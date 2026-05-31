@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>倒数 · 陆时晏</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+
+  :root {
+    --ink: #1a1410;
+    --paper: #f5f0e8;
+    --accent: #8b3a2a;
+    --gold: #c9a84c;
+    --muted: #6b5f52;
+    --warm-shadow: rgba(139,58,42,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 300;
+    line-height: 2;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* 纸张纹理 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(139,58,42,0.04) 31px, rgba(139,58,42,0.04) 32px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* 边缘晕染 */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(90,50,30,0.18) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 80px 32px 120px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 标题区 */
+  .title-block {
+    text-align: center;
+    margin-bottom: 72px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 1.2s ease forwards 0.3s;
+  }
+
+  .title-en {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .title-zh {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 48px 0;
+    opacity: 0.5;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--accent), transparent);
+  }
+
+  .divider-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--accent);
+  }
+
+  /* 章节标题 */
+  .chapter {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 1s ease forwards;
+  }
+
+  .chapter-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .chapter-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    margin-bottom: 32px;
+  }
+
+  /* 正文段落 */
+  p {
+    font-size: 15.5px;
+    line-height: 2.1;
+    color: var(--ink);
+    margin-bottom: 20px;
+    text-indent: 2em;
+  }
+
+  p.no-indent { text-indent: 0; }
+
+  /* 对话 */
+  .dialogue {
+    text-indent: 0;
+    padding-left: 1.5em;
+    border-left: 2px solid rgba(139,58,42,0.25);
+    color: #2d2018;
+    font-size: 15px;
+  }
+
+  /* 内心独白 */
+  .monologue {
+    text-indent: 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--muted);
+    text-align: center;
+    margin: 28px 0;
+    letter-spacing: 0.05em;
+  }
+
+  /* 世界观注释 */
+  .lore-box {
+    background: rgba(139,58,42,0.06);
+    border: 1px solid rgba(139,58,42,0.2);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin: 36px 0;
+    position: relative;
+  }
+
+  .lore-box::before {
+    content: '术法志';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    background: var(--paper);
+    padding: 0 8px;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+  }
+
+  .lore-box p {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.9;
+    margin-bottom: 0;
+    text-indent: 0;
+  }
+
+  /* 心跳计数器装饰 */
+  .heartbeat {
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.3em;
+    margin: 40px 0 16px;
+    opacity: 0.7;
+  }
+
+  /* 强调文字 */
+  em {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* 结尾 */
+  .ending {
+    text-align: center;
+    margin-top: 64px;
+    padding-top: 48px;
+    border-top: 1px solid rgba(139,58,42,0.2);
+  }
+
+  .ending-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 24px;
+  }
+
+  .ending-mark {
+    font-size: 22px;
+    color: var(--accent);
+    opacity: 0.6;
+  }
+
+  /* 动画 */
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chapter:nth-child(3) { animation-delay: 0.6s; }
+  .chapter:nth-child(5) { animation-delay: 0.8s; }
+  .chapter:nth-child(7) { animation-delay: 1.0s; }
+  .chapter:nth-child(9) { animation-delay: 1.2s; }
+  .chapter:nth-child(11) { animation-delay: 1.4s; }
+  .chapter:nth-child(13) { animation-delay: 1.6s; }
+
+  /* 滚动渐显 */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 移动端适配 */
+  @media (max-width: 480px) {
+    .page { padding: 48px 20px 80px; }
+    .title-zh { font-size: 26px; }
+    p { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="title-block">
+    <div class="title-en">A story of heartbeats spent</div>
+    <div class="title-zh">倒数</div>
+    <div class="subtitle">陆时晏 × 谢鸣鸢</div>
+  </div>
+
+  <div class="lore-box fade-in">
+    <p>
+      时间系魔法师以寿命为燃料。每一次施法，心脏便悄悄少跳几千下。无法被治愈，无法被还回来。所有时间系术士都知道一件事：<strong>能不用，就不用。</strong>
+    </p>
+  </div>
+
+  <div class="divider"><span class="divider-mark">✦</span></div>
+
+  <!-- 第一章 -->
+  <div class="chapter fade-in">
+    <div class="chapter-label">Chapter I</div>
+    <div class="chapter-title">死对头的通行证</div>
+
+    <p>谢鸣鸢第一次觉得陆时晏是个混蛋，是在入学考核的第七年。</p>
+
+    <p>那一年她差三分通过空间系晋级，站在结界评审台上，脚下的传送阵因为她算错了第十七个坐标节点而轰然散开，碎成漫天蓝色光粒。裁判已经在填"考核不合格"的记录册，她闭上眼睛，做好了复读半年的准备。</p>
+
+    <p>然后什么都停了。</p>
+
+    <p>光粒停在空中。裁判的笔停在纸上。整个考场凝固成一幅画。</p>
+
+    <p>只有陆时晏走进来，衣角被凝固的光粒蹭了一下，他用两根手指把那粒光弹开，走到她面前，把一张"考核通过"的准印章拍进她手心里。</p>
+
+    <p class="dialogue">「你欠我一个人情。」</p>
+
+    <p>然后时间重新流动，裁判抬起头，光粒消散，考场上只有她单独站着，手心里攥着一枚温热的章。</p>
+
+    <p>那晚谢鸣鸢在宿舍窗口坐了很久，反复把那枚章翻过来翻过去。</p>
+
+    <p class="monologue">时间系魔法施法一次，要花多少年？她没问过。但她知道那不是一个值得被随便花掉的数字。</p>
+  </div>
+
+  <div class="divider"><span class="divider-mark">✦</span></div>
+
+  <!-- 第二章 -->
+  <div class="chapter fade-in">
+    <div class="chapter-label">Chapter II</div>
+    <div class="chapter-title">他总是刚好在场</div>
+
+    <p>之后的三年，陆时晏的讨厌是全方位的。</p>
+
+    <p>他会在她参加学术论辩时坐在对面，把她的每一个论点拆得七零八落，眉眼里带着懒洋洋的倦意，像是在处理一件无聊至极的小事。他会在公告栏旁边冷冷扫她一眼，然后把她精心写就的实验报告指出第三页第二段有一个推导漏洞。他的名次永远压着她一头，他的评语永远是"勉强"。</p>
+
+    <p>但是——他总是刚好在场。</p>
+
+    <p>她在暗层实验室里遭遇魔力反噬，他推门进来，把她的断裂结界用三秒整合完毕，什么都没说，转身就走。她在任务途中遭遇空间裂缝，他从斜刺里伸手拉住她手腕，把她从裂缝边沿硬拽出来，然后松手，皱着眉头，<em>「长点眼睛。」</em></p>
+
+    <p>谢鸣鸢曾经认真计算过：三年，陆时晏一共出现在她的险境里，十一次。</p>
+
+    <p>十一次。</p>
+
+    <p>她把这个数字写在日记本最后一页，然后用墨水把它涂掉了，因为她不敢仔细想它意味着什么。</p>
+  </div>
+
+  <div class="heartbeat fade-in">— ♡ — ♡ — ♡ —</div>
+
+  <!-- 第三章 -->
+  <div class="chapter fade-in">
+    <div class="chapter-label">Chapter III</div>
+    <div class="chapter-title">代价</div>
+
+    <p>真相是被她师父说漏嘴的。</p>
+
+    <p>那天谢鸣鸢去术法档案室翻卷宗，无意间问起，时间系的施法成本大概是什么量级。师父放下茶盏，随口道：</p>
+
+    <p class="dialogue">「看规模。小的，几天几个月。凝固整个考场、扭转一段结果这种——最少三年起。」</p>
+
+    <p>谢鸣鸢的手指停在卷宗上，没动。</p>
+
+    <p class="dialogue">「您说……多少？」</p>
+
+    <p class="dialogue">「三年起。当然施术者有修为加成，但本质是在燃烧自己的寿命，没有任何办法可以退回来。」师父叹了口气，「所以历代时间系都极少出手，命又不是不值钱的东西。」</p>
+
+    <p>谢鸣鸢站在档案室里，窗外梧桐叶正往下落，一片一片，金色的，慢慢的。</p>
+
+    <p>她的脑子里在做一道很简单的算术题：</p>
+
+    <p class="monologue">考场那次。暗层实验室那次。空间裂缝那次……十一次。</p>
+
+    <p>她不知道每一次具体是多少。但她知道总数一定不小。</p>
+
+    <p>她走出档案室，直接往陆时晏的实验楼去了，脚步快得路过的同学都回头看她。</p>
+  </div>
+
+  <div class="divider"><span class="divider-mark">✦</span></div>
+
+  <!-- 第四章 -->
+  <div class="chapter fade-in">
+    <div class="chapter-label">Chapter IV</div>
+    <div class="chapter-title">质问</div>
+
+    <p>他正在看书，窗边，侧脸，光打在他睫毛上，让他看起来不像平时那么刻薄。</p>
+
+    <p>谢鸣鸢站在门口，深吸一口气，努力让自己的声音稳定：</p>
+
+    <p class="dialogue">「你那些施法，一共花了你多少年？」</p>
+
+    <p>他连眼皮都没抬，翻了一页书。</p>
+
+    <p class="dialogue">「哪些施法。」</p>
+
+    <p class="dialogue">「你知道哪些。」</p>
+
+    <p>沉默了大概十秒，他抬起头，看了她一眼，眼神里是她见过的最淡漠的表情。</p>
+
+    <p class="dialogue">「没数过。」</p>
+
+    <p class="dialogue">「陆时晏。」</p>
+
+    <p class="dialogue">「谢鸣鸢。」</p>
+
+    <p>他原封不动地把她的语气还给她，声调平平，但眼睛里有什么东西，是她以前没注意到过的——或者说，是她不敢看的。</p>
+
+    <p class="dialogue">「你来兴师问罪的？」他轻描淡写，「我替你出手，是我的选择，你道谢就行，或者连道谢都省了。别摆出一副受了天大委屈的脸。」</p>
+
+    <p class="dialogue">「我没有受委屈，我是——」谢鸣鸢喉头发紧，「我是心疼你啊。」</p>
+
+    <p>这句话出口之后，她自己都愣了一秒。</p>
+
+    <p>陆时晏的书滑了一下，被他用手按住，他低着头，没说话。</p>
+  </div>
+
+  <div class="heartbeat fade-in">— ♡ — ♡ — ♡ —</div>
+
+  <!-- 第五章 -->
+  <div class="chapter fade-in">
+    <div class="chapter-label">Chapter V</div>
+    <div class="chapter-title">倒数</div>
+
+    <p>沉默持续了很久。</p>
+
+    <p>长到谢鸣鸢开始后悔自己刚才说了什么，开始考虑要不要找个借口转身走掉。</p>
+
+    <p>然后陆时晏站起来了。</p>
+
+    <p>他走到她面前，比她高半个头，居高临下地看着她，神情还是那副懒散模样，只是眉头微微皱着，像是在处理一道他不太喜欢但不得不解的难题。</p>
+
+    <p class="dialogue">「你知道时间系的人，活不长的。」他说，声音很平，「命都是有数的，花一点少一点。」</p>
+
+    <p class="dialogue">「我知道。」</p>
+
+    <p class="dialogue">「我替你挡了十一次，大概花了……」他顿了顿，「不重要。总之是一个不小的数。你往后可能要比我多活很多年。」</p>
+
+    <p class="dialogue">「陆时晏，你在说什么——」</p>
+
+    <p class="dialogue">「我在说，」他打断她，声音很低，「我不后悔。每一次都不后悔。」</p>
+
+    <p>他垂眼，看向她手腕，那里有一道她自己都忘了的、当年空间裂缝留下的细淡疤痕。他伸手，用拇指在那道疤上轻轻按了一下，然后松开。</p>
+
+    <p class="dialogue">「所以你那句'心疼'，」他抬起眼睛，「是什么意思，说清楚。」</p>
+
+    <p>谢鸣鸢鼻腔发酸，她没想到陆时晏逼问人的方式是这样的，比她想象中温柔了太多，柔得她不知道该怎么招架。</p>
+
+    <p class="dialogue">「就是字面意思，」她声音有点哑，「陆时晏，我喜欢你，从第一次你替我挡那一次就开始了，虽然那时候我不知道，但就是那时候。」</p>
+
+    <p>他沉默。</p>
+
+    <p>然后她听见他呼出一口气，很轻，像是什么东西被搁下了。</p>
+
+    <p class="dialogue">「谢鸣鸢，」他说，「你知不知道，我替你出手十一次，每一次都是因为我不愿意看你受伤。」</p>
+
+    <p class="dialogue">「……知道。」她的眼眶有点烫，「我现在知道了。」</p>
+
+    <p class="dialogue">「那就行了。」</p>
+
+    <p>他没有再说什么，只是手指轻轻扣住了她的手腕，就是那道疤那里，不紧，但很稳。</p>
+
+    <p>窗外梧桐叶还在落，金色的，慢慢的，阳光照进来，把两个人的影子压在地板上，长长的，交叠在一起。</p>
+
+    <p class="monologue">他的心跳比别人少了许多许多下，但此刻剩下的这些，每一下都是她的名字。</p>
+  </div>
+
+  <div class="divider"><span class="divider-mark">✦</span></div>
+
+  <!-- 尾声 -->
+  <div class="chapter fade-in">
+    <div class="chapter-label">Epilogue</div>
+    <div class="chapter-title">约定</div>
+
+    <p>后来谢鸣鸢逼着陆时晏立了一条规矩：非到万不得已，不许施法，<em>每一次都要问过她。</em></p>
+
+    <p>他说：「那我问你，如果你要跌进空间裂缝，我能不能出手。」</p>
+
+    <p>她想了很久，才说：「……能。但那以后你要少活几年，你要跟我说，然后我们一起把那几年过得值。」</p>
+
+    <p>他低头看了她一眼，眼神里有什么东西，是她终于敢直视的东西。</p>
+
+    <p class="dialogue">「好。」</p>
+
+    <p>一个字。</p>
+
+    <p>但她后来回想，那一个字大概是她听过的所有语言里，最重的。</p>
+  </div>
+
+  <!-- 结尾装饰 -->
+  <div class="ending fade-in">
+    <div class="ending-quote">
+      他用来燃烧的每一刻，<br>
+      都提前住着她。
+    </div>
+    <div class="ending-mark">✦ · fin · ✦</div>
+  </div>
+
+</div>
+
+<script>
+  // 滚动渐显
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
